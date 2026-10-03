@@ -1,0 +1,8 @@
+interface:
+  display_name: "iPhone Duo Support"
+  short_description: "Migrate any app to iPhone Duo compatibility"
+  brand_color: "#0A58FF"
+  default_prompt: "Migrate this app to iPhone Duo compatibility. Detect the stack, audit the four broken assumptions, then apply the framework-specific guidance in this skill. Do not invent Apple APIs."
+
+policy:
+  allow_implicit_invocation: true
