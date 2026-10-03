@@ -18,91 +18,153 @@ Not affiliated with, endorsed by, or sponsored by Apple Inc. “iPhone” and �
 
 Instructions are sourced from Apple’s [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo), [Preparing your app for iPhone Duo](https://developer.apple.com/documentation/technologyoverviews/preparing-your-app-for-iphone-duo), and the practical checklist at [iphoneduosupport.com](https://iphoneduosupport.com/). The skill tells the agent not to invent APIs.
 
+## Clone this repository
+
+This repository **is** the skill. Clone it first, then copy `skills/iphone-duo-support/` into the app you want to migrate (or into your user-level skills folder). Copy the **whole folder**, not only `SKILL.md`, so the agent can load `references/` on demand. The folder name must stay `iphone-duo-support` to match the skill `name`.
+
+The repo is **private**. You need GitHub access (HTTPS with a PAT, or SSH with a key added to your GitHub account).
+
+```bash
+# HTTPS (prompts for GitHub credentials / token)
+git clone https://github.com/himanshu-kushwah/iphone-duo-support-skill.git
+
+# or SSH
+git clone git@github.com:himanshu-kushwah/iphone-duo-support-skill.git
+
+cd iphone-duo-support-skill
+```
+
+If you use the GitHub CLI:
+
+```bash
+gh repo clone himanshu-kushwah/iphone-duo-support-skill
+cd iphone-duo-support-skill
+```
+
+Set `SKILL_SRC` to this clone so the copy commands below work from any directory:
+
+```bash
+export SKILL_SRC="$PWD/skills/iphone-duo-support"
+```
+
+Then `cd` into the **app repository** you want to make Duo-ready (not this skill repo, unless you are only installing for yourself).
+
 ## Install
 
-The skill is the folder `skills/iphone-duo-support/` (a `SKILL.md` plus `references/`). Copy that folder — not just `SKILL.md` — so progressive disclosure still works. The folder name must stay `iphone-duo-support` to match the `name` field.
+Install into the app repo (project, shared with teammates) **or** your home directory (personal, all projects on this machine). Project copies should be committed.
 
 ### Cursor
 
-Project (shared with the repo):
+Cursor loads skills from `.agents/skills/`, `.cursor/skills/`, `~/.agents/skills/`, and `~/.cursor/skills/`. It also reads Claude/Codex folders (`.claude/skills/`, `.codex/skills/`).
+
+**Project** (commit this so Cloud Agents and teammates get it):
 
 ```bash
+cd /path/to/your-app
 mkdir -p .agents/skills
-cp -R /path/to/this-repo/skills/iphone-duo-support .agents/skills/
+cp -R "$SKILL_SRC" .agents/skills/
+git add .agents/skills/iphone-duo-support
+git commit -m "Add iPhone Duo support skill"
 ```
 
-Cursor also loads `.cursor/skills/`. User-wide:
+**Personal** (this machine only):
 
 ```bash
 mkdir -p ~/.cursor/skills
-cp -R /path/to/this-repo/skills/iphone-duo-support ~/.cursor/skills/
+cp -R "$SKILL_SRC" ~/.cursor/skills/
 ```
 
-Cursor additionally reads `.claude/skills/` and `.codex/skills/`, so one copy in `.agents/skills/` is enough for mixed teams.
+Personal `~/.cursor/skills/` copies stay local unless you turn on **Settings → Agents → Sync Skills for Cloud Agents**.
 
-Invoke with `/iphone-duo-support` or ask to migrate the app to iPhone Duo. Restart Agent if a newly copied skill does not appear under Customize → Skills.
-
-Personal `~/.cursor/skills/` copies stay on your machine unless you turn on **Sync Skills for Cloud Agents**.
+In Agent chat, type `/iphone-duo-support` or ask to migrate the app to iPhone Duo. Open **Customize → Skills** if it does not appear; restart Agent after a first-time copy.
 
 ### Claude Code
 
-Project:
+Claude Code loads `.claude/skills/` in the repo (and parent dirs up to the repo root) and `~/.claude/skills/` for you personally. Cloud / Cowork sessions **do not** read `~/.claude/skills/`; commit a project copy for those.
+
+**Project:**
 
 ```bash
+cd /path/to/your-app
 mkdir -p .claude/skills
-cp -R /path/to/this-repo/skills/iphone-duo-support .claude/skills/
+cp -R "$SKILL_SRC" .claude/skills/
+git add .claude/skills/iphone-duo-support
+git commit -m "Add iPhone Duo support skill"
 ```
 
-User-wide:
+**Personal:**
 
 ```bash
 mkdir -p ~/.claude/skills
-cp -R /path/to/this-repo/skills/iphone-duo-support ~/.claude/skills/
+cp -R "$SKILL_SRC" ~/.claude/skills/
 ```
 
-Commit the project copy so teammates and Claude cloud sessions get it. Invoke with `/iphone-duo-support`. Claude Code watches the skills directory; a restart is usually unnecessary.
+Invoke with `/iphone-duo-support`. Claude Code watches the skills directory; a restart is usually unnecessary.
 
 ### Codex
 
-Codex loads `.agents/skills` from the current directory up to the repo root, and `~/.agents/skills` for the user:
+Codex scans `.agents/skills` from the current directory up to the repo root, plus `~/.agents/skills`. This skill includes `agents/openai.yaml` for Codex/ChatGPT display metadata.
+
+**Project:**
 
 ```bash
+cd /path/to/your-app
 mkdir -p .agents/skills
-cp -R /path/to/this-repo/skills/iphone-duo-support .agents/skills/
+cp -R "$SKILL_SRC" .agents/skills/
+git add .agents/skills/iphone-duo-support
+git commit -m "Add iPhone Duo support skill"
 ```
 
-or
+**Personal:**
 
 ```bash
 mkdir -p ~/.agents/skills
-cp -R /path/to/this-repo/skills/iphone-duo-support ~/.agents/skills/
+cp -R "$SKILL_SRC" ~/.agents/skills/
 ```
 
-Invoke with `$iphone-duo-support` (or `/skills`). Codex picks up new skills automatically; restart if one is missing. This skill includes `agents/openai.yaml` for Codex/ChatGPT display metadata.
+Invoke with `$iphone-duo-support` or `/skills`. Codex detects new skills automatically; restart Codex if one is missing.
 
-### One copy for all three
+You can also ask Codex `$skill-installer` to pull from this repo if you use that workflow; a manual copy is enough.
 
-If the repo is used with Cursor, Claude, and Codex:
+### One copy for Claude, Codex, and Cursor
 
-```bash
-mkdir -p .agents/skills
-cp -R skills/iphone-duo-support .agents/skills/
-```
-
-Cursor and Codex load `.agents/skills/` natively. For Claude Code, either also copy to `.claude/skills/` or symlink:
+If the same app repo is used with all three tools, install once under `.agents/skills/` and symlink for Claude:
 
 ```bash
-mkdir -p .claude/skills
+cd /path/to/your-app
+mkdir -p .agents/skills .claude/skills
+cp -R "$SKILL_SRC" .agents/skills/
 ln -s ../../.agents/skills/iphone-duo-support .claude/skills/iphone-duo-support
 ```
 
+Cursor and Codex load `.agents/skills/` natively. Claude Code follows the symlink in `.claude/skills/`.
+
 ## Use
 
-In the app you want to migrate, with the skill installed, ask:
+In the **app** you want to migrate, with the skill installed, ask:
 
 > Migrate this app to iPhone Duo compatibility.
 
-The agent should detect the stack, report the SDK tier, grep for the four broken assumptions, then apply the matching reference (`native-ios`, `react-native`, `flutter`, or `other-stacks`).
+Or invoke it by name:
+
+| Tool | Invoke |
+| --- | --- |
+| Cursor | `/iphone-duo-support` |
+| Claude Code | `/iphone-duo-support` |
+| Codex | `$iphone-duo-support` |
+
+The agent should:
+
+1. Detect the stack (SwiftUI, UIKit, React Native/Expo, Flutter, Unity, Capacitor/web, or other).
+2. Report the iOS SDK / Xcode tier.
+3. Grep for the four broken assumptions (fixed widths, orientation locks, symmetric insets, idiom/device-type gates).
+4. Apply the matching reference under `references/` and verify poses in Xcode 27.1 Device Hub when available.
+
+Example follow-ups:
+
+- “Audit this React Native app for iPhone Duo; don’t bump the SDK yet.”
+- “Adopt ArrangementView on the player screen.”
+- “Fix asymmetric safe-area math in UIKit.”
 
 ## Layout of this repository
 
